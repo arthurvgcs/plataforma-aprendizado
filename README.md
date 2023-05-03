@@ -22,3 +22,6 @@ quasar build
 
 ### Customize the configuration
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+
+![image](https://user-images.githubusercontent.com/69826657/235979342-a42d9815-7bba-4a64-b226-61b4d05bd3fb.png)
+
