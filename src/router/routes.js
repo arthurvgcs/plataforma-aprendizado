@@ -12,13 +12,16 @@ const routes = [
     name: 'login',
     component: () => import('pages/Login.vue')
   },
-  
   {
     path: '/principal',
     name: 'principal',
     component: () => import('pages/PaginaPrincipal.vue')
   },
-
+  {
+    path: '/duvida',
+    name: 'duvida',
+    component: ( ) => import('pages/Duvida.vue')
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

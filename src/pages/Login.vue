@@ -143,6 +143,12 @@ export default ({
       loading: false
     }
   },
+  methods: {
+    fazerLogin(){
+      console.log('entrou aqui')
+      this.$router.push({ name: 'principal' })
+    }
+  }
 })
 
 </script>
