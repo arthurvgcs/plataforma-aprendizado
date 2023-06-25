@@ -22,6 +22,11 @@ const routes = [
     name: 'duvida',
     component: ( ) => import('pages/Duvida.vue')
   },
+  {
+    path: '/chamada',
+    name: 'chamada',
+    component: ( ) => import('pages/EmChamada.vue')
+  },
   // Always leave this as last one,
   // but you can also remove it
   {
