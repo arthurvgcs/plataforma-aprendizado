@@ -1,79 +1,107 @@
 <template>
-  <div class="barra_principal">
-    <h2>LOGO</h2>
-    <div class="usuario">
-      <q-icon name="person" style="font-size: 30px;" class="usuario_icon" />
-      <h3>Usuario</h3>
-    </div>
-  </div>
-
-  <div class="conteudo">
-    <div class="forum">
-      <div class="forum_titulo">
-        <h2>Foruns</h2>
-      </div>
-      <q-select
-        filled
-        v-model="forumFilter"
-        label="Selecione o forum"
-        :options="filteredForums"
-        use-input
-        input-debounce="0"
-        behavior="menu"
-        class="forum_filter"
-        @filter="filterForums"
-      >
-        <template v-slot:no-option>
-          <q-item>
-            <q-item-section class="text-grey">
-              Nenhum resultado
-            </q-item-section>
-          </q-item>
-        </template>
-      </q-select>
-    </div>
-
-    <div class="duvida">
-      <form @submit.prevent="submitForm">
+  <div>
+    <q-layout>
+      <q-page-container>
         <div>
-          <q-input
-            filled
-            outlined
-            dense
-            v-model="duvida"
-            label="Digite sua duvida"
-            class="input_duvida"
-          >
-            <template v-slot:prepend>
-              <q-icon name="search" />
-            </template>
-          </q-input>
+          <q-toolbar class="bg-dark text-white">
+            <q-btn flat round dense icon="menu" class="q-mr-sm" />
+            <q-avatar>
+              <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+            </q-avatar>
+
+            <q-toolbar-title>Activison</q-toolbar-title>
+
+            <div class="usuario">
+              <q-avatar>
+                <img src="https://cdn.quasar.dev/img/avatar.png">
+              </q-avatar>
+              <q-btn-dropdown color="white" label="Olá, Mary" flat>
+                <q-list>
+                  <q-item clickable v-close-popup >
+                    <q-item-section>
+                      <q-item-label>Sair</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-btn-dropdown>
+            </div>
+          </q-toolbar>
         </div>
-        <div class="tags_container">
-          <q-select
-            filled
-            outlined
-            dense
-            v-model="selectedOptions"
-            :options="options"
-            multiple
-            label="Insira as tags da duvida"
-            class="input_tags"
-          />
+        <div class="conteudo">
+          <div class="forum">
+            <q-card class="my-card">
+              <q-card-section class="bg-secondary text-white">
+                <div class="text-h6">Fóruns</div>
+              </q-card-section>
+
+              <q-separator />
+
+              <q-select
+                filled
+                v-model="forumFilter"
+                label="Selecione o fórum"
+                :options="filteredForums"
+                use-input
+                input-debounce="0"
+                behavior="menu"
+                class="forum_filter"
+                style="min-width: 350px; max-width: 350px;"
+                @filter="filterForums"
+              >
+                <template v-slot:no-option>
+                  <q-item>
+                    <q-item-section class="text-grey">
+                      Nenhum resultado
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </q-card>
+          </div>
+          <div>
+            <form @submit.prevent="submitForm">
+              <div class="duvida">
+                <q-input
+                  required
+                  filled
+                  outlined
+                  dense
+                  v-model="duvida"
+                  label="Digite sua dúvida"
+                  class="input_duvida"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+              </div>
+              <div class="tags_container">
+                <q-select
+                  filled
+                  outlined
+                  dense
+                  v-model="selectedOptions"
+                  :options="options"
+                  multiple
+                  label="Insira as tags da dúvida"
+                  class="input_tags"
+                />
+              </div>
+              <div class="centralizado">
+                <q-btn
+                  color="aqua"
+                  label="Enviar"
+                  class="input_submit"
+                  type="submit"
+                />
+              </div>
+            </form>
+          </div>
         </div>
-        <div class="centralizado">
-          <q-btn
-            color="aqua"
-            label="Enviar"
-            class="input_submit"
-            type="submit"
-          />
-        </div>
-      </form>
-    </div>
+      </q-page-container>
+    </q-layout>
   </div>
 </template>
-
 <script>
 export default {
   name: 'PaginaPrincipal',
@@ -136,7 +164,6 @@ export default {
   },
 };
 </script>
-
 <style>
 .barra_principal {
   display: flex;
@@ -169,7 +196,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-right: 20px;
+  margin-top: 100px;
 }
 
 .forum_titulo {
@@ -206,6 +233,7 @@ export default {
   width: 1000px;
   font-size: 1.5em;
   margin-bottom: 5px;
+  margin-top: 25%;
 }
 
 .input_submit {
@@ -213,7 +241,7 @@ export default {
   width: 10%;
   height: 40px;
   font-size: 1.5em;
-  background-color: aqua;
+  background-color: darkcyan;
   border: 1px solid black;
   cursor: pointer;
   display: flex;
@@ -223,7 +251,6 @@ export default {
   display: flex;
   justify-content: center;
 }
-
 
 .tags_container {
   display: flex;
@@ -257,7 +284,7 @@ export default {
 .selected_option_box {
   display: flex;
   align-items: center;
-  background-color: aqua;
+  background-color: darkcyan;
   border: 1px solid black;
   border-radius: 5px;
   padding: 5px;
