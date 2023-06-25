@@ -2,7 +2,6 @@ class Validator{
 
     constructor(){
         this.validations = [
-            'required-Select',
             'required-Checkbox',
             'data-required',
             'data-min-length',
