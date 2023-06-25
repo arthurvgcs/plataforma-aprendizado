@@ -93,6 +93,7 @@
                   label="Enviar"
                   class="input_submit"
                   type="submit"
+                  @click="redirectChamada"
                 />
               </div>
             </form>
@@ -155,6 +156,10 @@ export default {
           forum.label.toLowerCase().includes(needle)
         );
       });
+    },
+    redirectChamada(event) {
+      event.preventDefault();
+      this.$router.push('/chamada');
     },
   },
   watch: {
