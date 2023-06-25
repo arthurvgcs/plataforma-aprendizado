@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro De Topico No Forum</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="main-container">
+        <h1>Registre O Assunto</h1>
+
+        <form id="register-form">
+            <div class="full-box spacing">
+                <label for="titulo">Título</label>
+                <input type="text" name="titulo" id="titulo" placeholder="Digite o título do seu tópico" data-min-length="10" data-required> <br>
+            </div>
+
+            <div class="full-box spacing"> 
+                <label for="descricao">Descrição</label>
+                <input type="text" name="descricao" id="descricao" placeholder="Digite a descrição do seu tópico" data-min-length="10" data-required> <br>
+            </div>
+
+            <div class="full-box spacing">
+                <label for="tag">Tag</label>
+                <select name="tag" id="tag" required-select>
+                    <option value="">Selecione uma opção</option>
+                    <option value="tag1">Desenvolvimento Web</option>
+                    <option value="tag2">Java</option>
+                    <option value="tag3">Banco De Dados</option>
+                    <option value="tag4">Estrutura De Dados</option>
+                </select>
+            </div>
+
+            <div class="full-box">
+                <input type="checkbox" name="agreement" id="agreement" required-checkbox>
+                <label for="agreement" id="agreement-label"> Eu li e aceito os <a href="#">termos</a> </label>
+            </div>
+            
+            <div class="full-box">
+                <input type="submit" id="btn-submit" value="Registrar">
+            </div>
+        </form>
+    </div>
+    <p class="error-validation template"></p>
+    <p class="error-validation template checkbox-error"></p>
+    <script src="js/scripts.js"></script>
+</body>
+</html>
