@@ -58,6 +58,14 @@
         text-color="white"
         bg-color="primary"
       />
+
+      <q-btn class="q-my-xs"
+              style="width: 100%"
+              color="primary"
+              :loading="loading"
+              @click="listaContas()">
+              Teste
+            </q-btn>
     </div>
     </q-card>
     </div>
@@ -67,6 +75,7 @@
 </template>
 
 <script>
+import { ListarContas } from 'src/service/api'
 export default ({
   name: 'Login',
   data () {
@@ -83,6 +92,10 @@ export default ({
     fazerLogin(){
       console.log('entrou aqui')
       this.$router.push({ name: 'principal' })
+    },
+    async listaContas(){
+      const { data } = await ListarContas()
+      console.log(data)
     }
   }
 })
