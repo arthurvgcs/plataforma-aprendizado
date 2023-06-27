@@ -13,6 +13,11 @@ const routes = [
     component: () => import('pages/Login.vue')
   },
   {
+    path: '/cadastro',
+    name: 'cadastro',
+    component: () => import('pages/Cadastro.vue')
+  },
+  {
     path: '/principal',
     name: 'principal',
     component: () => import('pages/PaginaPrincipal.vue')

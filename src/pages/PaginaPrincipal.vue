@@ -15,7 +15,7 @@
               <q-avatar>
                 <img src="https://cdn.quasar.dev/img/avatar.png">
               </q-avatar>
-              <q-btn-dropdown color="white" label="Olá, Mary" flat>
+              <q-btn-dropdown color="white" :label='`Olá, ${user.nome} `' flat>
                 <q-list>
                   <q-item clickable v-close-popup >
                     <q-item-section>
@@ -27,8 +27,10 @@
             </div>
           </q-toolbar>
         </div>
-        <div class="conteudo">
-          <div class="forum">
+        <div class="flex justify-center">
+          <div class="col-1"></div>
+          <div class="col-10 justify-center q-pa-md">
+          <!-- <div class="forum">
             <q-card class="my-card">
               <q-card-section class="bg-secondary text-white">
                 <div class="text-h6">Fóruns</div>
@@ -57,17 +59,15 @@
                 </template>
               </q-select>
             </q-card>
-          </div>
-          <div>
+          </div> -->
             <form @submit.prevent="submitForm">
-              <div class="duvida">
+              <div class="flex row justify-center">
                 <q-input
-                  required
+                  dark
                   filled
                   outlined
-                  dense
                   v-model="duvida"
-                  label="Digite sua dúvida"
+                  label="Busque sua dúvida no nosso forum"
                   class="input_duvida"
                 >
                   <template v-slot:prepend>
@@ -75,40 +75,68 @@
                   </template>
                 </q-input>
               </div>
-              <div class="tags_container">
+              <div class="flex row justify-center">
                 <q-select
+                  dark
                   filled
                   outlined
-                  dense
                   v-model="selectedOptions"
                   :options="options"
+                  use-input
+                  input-debounce="0"
+                  behavior="menu"
                   multiple
-                  label="Insira as tags da dúvida"
-                  class="input_tags"
-                />
-              </div>
-              <div class="centralizado">
-                <q-btn
-                  color="aqua"
-                  label="Enviar"
-                  class="input_submit"
-                  type="submit"
-                  @click="redirectChamada"
+                  label="Filtre suas dúvidas pelas tags"
+                  class="input_duvida q-mt-md"
                 />
               </div>
             </form>
-          </div>
+            <div class="row justify-end">
+              <q-btn class="flex justify-end q-mt-md" color="primary" label="Quero criar uma nova Duvida" text-color="white" @click="estadoModal">
+              </q-btn>
+            </div>
+            <div>
+              <q-card v-for="duvida in duvidas" class="q-mt-md">
+                <q-card-section>
+                  <div class="text-h6">{{ duvida.titulo }}</div>
+                  <div class="text-subtitle2">Por {{ duvida.conta.nome }}</div>
+                </q-card-section>
+                <q-separator dark inset />
+                <q-card-section>
+                  {{ duvida.descricao }}
+                </q-card-section>
+              </q-card>
+            </div>
         </div>
+        <div class="col-1"></div>
+        </div>
+        
       </q-page-container>
     </q-layout>
+    <ModalDuvida
+      :modalDuvida="modalDuvida"
+      v-on:fechou-modal="estadoModal()"
+      v-on:atualizar-duvida="duvidaCriada"
+    />
   </div>
 </template>
 <script>
+import { list } from 'postcss';
+import ModalDuvida from 'src/pages/ModalDuvida.vue'
+import { ListarTopicos } from 'src/service/api'
 export default {
   name: 'PaginaPrincipal',
+  components: { ModalDuvida },
   data() {
     return {
-      duvida: '',
+      duvidas: [],
+      user: {
+        id: undefined,
+        nome: undefined,
+        email: undefined,
+        perfil: undefined
+      },
+      modalDuvida: false,
       options: ['Opção 1', 'Opção 2', 'Opção 3', 'Opção 4'],
       forumFilter: '',
       forums: [
@@ -120,9 +148,6 @@ export default {
       filteredForums: [],
       selectedOptions: [],
     };
-  },
-  mounted() {
-    this.filteredForums = [...this.forums];
   },
   methods: {
     submitForm() {
@@ -142,25 +167,32 @@ export default {
 
       console.log(data);
     },
-    filterForums(val, update) {
-      if (val === '') {
-        update(() => {
-          this.filteredForums = [...this.forums];
-        });
-        return;
-      }
-
-      update(() => {
-        const needle = val.toLowerCase();
-        this.filteredForums = this.forums.filter((forum) =>
-          forum.label.toLowerCase().includes(needle)
-        );
-      });
+    async listarDuvidas () {
+      const { data } = await ListarTopicos()
+      this.duvidas = data
+    },
+    estadoModal () {
+      this.modalDuvida = !this.modalDuvida
+      console.log(this.modalDuvida)
+    },
+    duvidaCriada (duvida) {
+      const obj = [...this.duvidas]
+      obj.push(duvida)
+      this.duvidas = [...obj]
     },
     redirectChamada(event) {
       event.preventDefault();
       this.$router.push('/chamada');
     },
+  },
+  async mounted () {
+    await this.listarDuvidas()
+    this.user = {
+      id: localStorage.getItem("id"),
+      nome: localStorage.getItem("nome"),
+      email: localStorage.getItem("email"),
+      perfil: localStorage.getItem("perfil")
+    }
   },
   watch: {
     forumFilter() {
@@ -170,139 +202,10 @@ export default {
 };
 </script>
 <style>
-.barra_principal {
-  display: flex;
-  background-color: aqua;
-  text-align: left;
-  padding: 10px;
-  justify-content: space-between;
-}
-
-.usuario {
-  display: flex;
-  align-items: center;
-}
-
-.usuario_icon {
-  margin-right: 10px;
-  margin-bottom: 5px;
-}
-
-.usuario_seta {
-  padding-left: 10px;
-  margin-bottom: 5px;
-}
-
-.conteudo {
-  display: flex;
-}
-
-.forum {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 100px;
-}
-
-.forum_titulo {
-  display: flex;
-  align-items: center;
-}
-
-.forum_seta {
-  padding-top: 5px;
-  padding-left: 5px;
-  color: aqua;
-}
-
-.forum p {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  color: blueviolet;
-  text-decoration: underline;
-}
-
-.duvida {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-}
-
-.input_tags {
-  width: 1000px;
-  font-size: 1.5em;
-}
 
 .input_duvida {
-  width: 1000px;
-  font-size: 1.5em;
-  margin-bottom: 5px;
-  margin-top: 25%;
+  width: 650px;
 }
 
-.input_submit {
-  margin-top: 5px;
-  width: 10%;
-  height: 40px;
-  font-size: 1.5em;
-  background-color: darkcyan;
-  border: 1px solid black;
-  cursor: pointer;
-  display: flex;
-}
 
-.centralizado {
-  display: flex;
-  justify-content: center;
-}
-
-.tags_container {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.dropdown {
-  position: absolute;
-  right: 0;
-  border: none;
-  padding: 5px;
-  display: flex;
-  align-items: center;
-}
-
-.dropdown_icon {
-  margin-left: 5px;
-  cursor: pointer;
-}
-
-.selected_options {
-  margin-top: 10px;
-}
-
-.selected_options_container {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.selected_option_box {
-  display: flex;
-  align-items: center;
-  background-color: darkcyan;
-  border: 1px solid black;
-  border-radius: 5px;
-  padding: 5px;
-  margin-right: 5px;
-  margin-bottom: 5px;
-}
-
-.selected_option {
-  margin-right: 5px;
-}
-
-.remove_option {
-  cursor: pointer;
-  margin-left: 5px;
-}
 </style>

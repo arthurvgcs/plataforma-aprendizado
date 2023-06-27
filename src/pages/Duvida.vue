@@ -77,7 +77,7 @@
 <script>
 import { ListarContas } from 'src/service/api'
 export default ({
-  name: 'Login',
+  name: 'Duvida',
   data () {
     return {
       form: {
