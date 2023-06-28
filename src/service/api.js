@@ -52,3 +52,13 @@ export function ListaComentarioByTopico (id) {
 export function DeletarConta (id) {
   return axios.delete(`${API_URL}/contas/remover/${id}`)
 }
+
+export function EditarConta (id, conta) {
+  return axios.put(`${API_URL}/contas/editarConta/${id}`, {
+    perfil: conta.perfil
+  })
+}
+
+export function DeletarTopico (id){
+  return axios.delete(`${API_URL}/forum/removerTopico/${id}`)
+}

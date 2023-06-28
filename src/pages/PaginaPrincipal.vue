@@ -6,36 +6,6 @@
         <div class="flex justify-center">
           <div class="col-1"></div>
           <div class="col-10 justify-center q-pa-md">
-          <!-- <div class="forum">
-            <q-card class="my-card">
-              <q-card-section class="bg-secondary text-white">
-                <div class="text-h6">Fóruns</div>
-              </q-card-section>
-
-              <q-separator />
-
-              <q-select
-                filled
-                v-model="forumFilter"
-                label="Selecione o fórum"
-                :options="filteredForums"
-                use-input
-                input-debounce="0"
-                behavior="menu"
-                class="forum_filter"
-                style="min-width: 350px; max-width: 350px;"
-                @filter="filterForums"
-              >
-                <template v-slot:no-option>
-                  <q-item>
-                    <q-item-section class="text-grey">
-                      Nenhum resultado
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </q-card>
-          </div> -->
               <div class="flex row justify-center">
                 <q-input
                   dark
@@ -58,34 +28,35 @@
                   v-model="selectedTags"
                   :options="options"
                   use-input
-                  input-debounce="0"
+                  use-chips
+                  input-debounce="300"
                   behavior="menu"
                   multiple
                   label="Filtre suas dúvidas pelas tags"
                   class="input_duvida q-mt-md"
                 />
               </div>
-            <div class="row justify-end">
-              <q-btn class="flex justify-end q-mt-md" color="primary" label="Quero criar uma nova Duvida" text-color="white" @click="estadoModal">
+            <div class="flex row justify-end">
+              <q-btn class="flex justify-end q-mt-md" color="blue" label="Quero criar uma nova Duvida" text-color="white" @click="estadoModal">
               </q-btn>
             </div>
             <div v-for="duvida in duvidas">
-              <q-card :key="duvida.codigo" v-if="duvidaFilter === '' || duvida.titulo.toLowerCase().includes(duvidaFilter.toLowerCase())" class="my-card q-mt-md">
-                <q-card-section>
+              <q-card  :key="duvida.codigo" v-if="duvidaFilter === '' || duvida.titulo.toLowerCase().includes(duvidaFilter.toLowerCase())" class="my-card flex column q-mt-md">
+                <q-card-section class="">
                   <div class="text-h6">{{ duvida.titulo }}</div>
                   <div class="text-subtitle2">Por {{ duvida.conta.nome }}</div>
-                  <q-badge v-for="badge in duvida.tags" color="primary" class="q-mr-sm">
+                  <q-badge v-for="badge in duvida.tags" rounded color="blue" class="q-mr-sm">
                     {{ badge }}
                   </q-badge>
                 </q-card-section>
                 <q-separator dark inset />
-                <q-card-section>
+                <q-card-section class="flex row">
                   {{ duvida.descricao }}
                 </q-card-section>
-                <q-card-section class="flex justify-end">
+                <q-card-section class="flex row justify-end">
                   <q-btn label="Ver Duvida"
                       class="q-px-md flex"
-                      color="primary"
+                      color="blue"
                       @click="pageDuvida(duvida)" />
                 </q-card-section>
               </q-card>
@@ -158,12 +129,9 @@ export default {
     },
     estadoModal () {
       this.modalDuvida = !this.modalDuvida
-      console.log(this.modalDuvida)
     },
     duvidaCriada (duvida) {
-      const obj = [...this.duvidas]
-      obj.push(duvida)
-      this.duvidas = [...obj]
+      this.listarDuvidas()
     },
     pageDuvida (duvida) {
       this.$router.push({ path: `/duvida/${duvida.codigo}` })
@@ -191,7 +159,7 @@ export default {
 </script>
 <style>
 .my-card {
-  width: 650px;
+  width: auto;
   max-width: 650px;
 }
 .input_duvida {

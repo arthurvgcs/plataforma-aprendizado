@@ -8,26 +8,24 @@
       <q-card-section class="q-col-gutter-sm">
         <div class="row q-col-gutter-sm">
             <div class="col-12">
-              <q-input outlined color="blue" label="Titulo da duvida" v-model="duvida.titulo" :error="erroTitulo"/>
+              <q-input disable color="blue" readonly outlined label="Nome" v-model="conta.nome" :error="erroNome"/>
             </div>
           </div>
           <div class="row q-col-gutter-sm">
             <div class="col-12">
-              <q-input outlined color="blue" label="Descrição da Duvida" v-model="duvida.descricao" :error="erroDescricao"/>
+              <q-input disable color="blue" readonly outlined label="Email" v-model="conta.email" :error="erroPerfil"/>
             </div>
           </div>
           <div class="row q-col-gutter-sm">
             <div class="col-12">
               <q-select
                 outlined
-                v-model="duvida.tags"
-                multiple=""
-                label="Tags"
-                :options="tags"
-                use-input
+                v-model="conta.perfil"
+                label="Escolha o perfil"
+                :options="perfis"
                 use-chips
-                stack-label
                 color="blue"
+                emit-value
                />
             </div>
           </div>
@@ -38,50 +36,52 @@
           color="negative"
           @click="fecharModal"
           v-close-popup />
-        <q-btn label="Enviar Duvida"
+        <q-btn label="Salvar"
           class="q-px-md"
           color="blue"
-          @click="criarDuvida(duvida)" />
+          @click="editarConta(conta)" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script>
-import { CriarDuvida} from 'src/service/api'
+import { CriarDuvida, EditarConta} from 'src/service/api'
 
 export default {
-  name: 'ModalDuvida',
+  name: 'ModalConta',
   props: {
-    modalDuvida: {
+    modalConta: {
       type: Boolean,
       default: false
+    },
+    contaSelecionada: {
+      type: Object,
+      default: () => {}
     }
   },
   computed: {
     modalVisible: {
       get() {
-        return this.modalDuvida;
+        return this.modalConta;
       },
       set(value) {
-        this.$emit('update:modalDuvida', value);
+        this.$emit('update:modalConta', value);
       }
     }
   },
   data () {
     return {
       user: {},
-      duvida: {
-        titulo: undefined,
-        descricao: undefined,
-        tags: [],
-        status: false,
-        contaId: localStorage.getItem("id")
+      conta: {
+        nome: undefined,
+        email: undefined,
+        perfil: undefined
       },
-      erroTitulo: false,
-      erroTag: false,
-      erroDescricao: false,
-      tags: [ 'Web 1', 'Java/Spring', 'PHP/Laravel', 'JavaScript']
+      erroNome: false,
+      erroEmail: false,
+      erroPerfil: false,
+      perfis: ["Aluno", "Moderador", "Especialista"]
     }
   },
   mounted() {
@@ -93,35 +93,36 @@ export default {
     }
   },
   methods: {
+    async editarConta(conta) {
+      await EditarConta(conta.codigo, conta).then(res =>{
+        this.$emit('atualizar-valor', res.data)
+        this.fecharModal()
+      })
+    },
     resetModel () {
-      this.duvida = {
-        titulo: undefined,
-        descricao: undefined,
-        tags: [],
-        status: false,
-        contaId: localStorage.getItem("id")
+      this.conta = {
+        nome: undefined,
+        email: undefined,
+        perfil: undefined
       }
-      this.erroTitulo = false
-      this.erroTag = false
-      this.erroDescricao = false
+      this.erroNome = false
+      this.erroEmail = false
+      this.erroPerfil = false
     },
     fecharModal () {
       this.resetModel()
       this.$emit('fechou-modal')
     },
-    async criarDuvida(duvida) {
-      if (this.duvida.descricao == undefined) this.erroDescricao = true
-      if (this.duvida.tags == []) this.erroTag = true
-      try {
-          await CriarDuvida(duvida).then(res => {
-            this.$emit('atualizar-duvida', res.data)
-          })
-        this.$emit('fechou-modal')
-        this.resetModel()
-      } catch (e) {
-      }
-    },
   },
+  watch: {
+    modalConta () {
+      if(this.contaSelecionada != {}) {
+        this.conta = {...this.contaSelecionada}
+      }else {
+        this.resetModel()
+      }
+    }
+  }
 }
 </script>
 

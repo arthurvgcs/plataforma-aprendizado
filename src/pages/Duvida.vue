@@ -2,50 +2,74 @@
   <q-layout>
     <q-page-container>
     <NavBar></NavBar>
-    <div class="flex justify-center">
+    <div class="flex column">
+      <div class="flex justify-center">
       <q-card class="my-card q-mt-md">
-      <q-card-section>
-        <div class="text-h6">{{ this.topico.titulo }}</div>
+      <q-card-section class="flex row">
+        <div class="text-h6 flex column col-8">{{ topico.titulo }}
+        </div>
+        <div v-if="user.id == contaTopico.codigo || user.perfil == 'Moderador'" class="q-ml-lg flex justify-end col-3">
+          <q-btn rounded color="negative" @click="deletarTopico(this.id)">
+            <q-icon name="mdi-delete"></q-icon>
+          </q-btn>
+        </div>
       </q-card-section>
       <q-card-section class="q-pt-none">
-        <q-badge v-for="badge in this.topico.tags" color="primary" class="q-mr-sm">
+        <q-badge v-for="badge in this.topico.tags" rounded color="blue" class="q-mr-sm">
           {{ badge }}
         </q-badge>
       </q-card-section>
       <q-card-section class="q-pt-none">
-        <q-avatar color="primary" text-color="white" class="q-mr-sm">
+        <q-avatar color="blue" text-color="white" class="q-mr-sm">
           <q-icon name="mdi-account"></q-icon>
         </q-avatar>
-        UserName
+        {{ contaTopico.nome }}
       </q-card-section>
       <q-card-section>
         {{ this.topico.descricao }}
       </q-card-section>
       <q-separator inset />
-      <q-card-actions v-if="isResposta" class="flex justify-end">
+      <div v-if="user.perfil == 'Especialista'">
+        <q-card-actions v-if="isResposta" class="flex justify-end">
         <q-editor class="my-editor q-ma-sm" v-model="comentario.comentario" min-height="5rem" />
         <q-card-section class="">
           <q-btn class="q-mr-md" label="Cancelar Resposta" color="negative" @click="modalResposta"></q-btn>
-          <q-btn class="" label="Enviar" color="primary" @click="enviarResposta(comentario)"></q-btn>
+          <q-btn class="" label="Enviar" color="blue" @click="enviarResposta(comentario)"></q-btn>
         </q-card-section>
-      </q-card-actions>
-      <q-card-section v-else class="flex justify-start">
-        <q-btn label="Adicione uma Resposta" color="primary" @click="modalResposta">
-        </q-btn>
+        </q-card-actions>
+        <q-card-section v-else class="flex justify-start">
+          <q-btn label="Adicione uma Resposta" color="blue" @click="modalResposta">
+          </q-btn>
+        </q-card-section>
+      </div>
+      <div class="flex justify-start" style="width: 650px;">
+      <q-card-section v-if="comentarios.length > 0">
+        <div class="text-h6">Respostas:</div>
       </q-card-section>
-      <q-card-section v-for="comentario in comentarios">
-        <q-chat-message
-        :name= comentario.conta.nome
-        avatar="https://cdn.quasar.dev/img/avatar3.jpg"
-        :text="[
-          `${comentario.comentario}`,
-        ]"
-        size="10"
-        text-color="white"
-        bg-color="primary"
-      />
+      <q-card-section v-else>
+        <div class="text-h6">Não temos resposta nesse topico, aguarde um especialista responder.</div>
+      </q-card-section>
+      </div>
+    </q-card>
+    </div>
+    <div class="flex justify-center" v-for="comentario in comentarios">
+      <q-card class="my-card q-mt-md">
+      <q-card-section>
+        <div class="text-subtitle1"><q-avatar color="blue" text-color="white" class="q-mr-sm">
+          <q-icon name="mdi-account"></q-icon>
+        </q-avatar>{{ comentario.conta.nome }}</div>
+      </q-card-section>
+      <q-card-section>
+        <q-badge rounded color="secondary" class="q-mr-sm">
+          Especialista
+        </q-badge>
+      </q-card-section>
+      <q-separator dark inset />
+      <q-card-section class="text-subtitle2">
+        {{ comentario.comentario }}
       </q-card-section>
     </q-card>
+    </div>
     </div>
     </q-page-container>
   </q-layout>
@@ -53,9 +77,10 @@
 
 <script>
 import { route } from 'quasar/wrappers'
-import { ListaTopicoById, AdicionarComentario, ListaComentarioByTopico } from 'src/service/api'
+import { ListaTopicoById, AdicionarComentario, ListaComentarioByTopico, DeletarTopico } from 'src/service/api'
 import NavBar from 'src/components/NavBar.vue'
 import { useRoute } from 'vue-router'
+import { onUpdated } from 'vue'
 export default ({
   name: 'Duvida',
   components: { NavBar },
@@ -67,25 +92,33 @@ export default ({
       },
       comentarios: [],
       topico: {},
+      contaTopico: {},
       form: {
         email: null,
         password: null,
       },
+      user: {
+        id: undefined,
+        nome: undefined,
+        email: undefined,
+        perfil: undefined
+      },
       isPwd: true,
       loading: false,
       id: null,
-      isResposta: false
+      isResposta: false,
+      isAluno: false
     }
   },
   created() {
     this.id = this.$route.params.duvidaId;
-    this.listaTopicoId(this.id)
     this.listaComentarioByTopico(this.id)
   },
   methods: {
     async listaTopicoId(id){
       const { data } = await ListaTopicoById(id)
       this.topico = data
+      this.contaTopico = data.conta
     },
     async listaComentarioByTopico(id){
       const { data } = await ListaComentarioByTopico(id)
@@ -94,17 +127,31 @@ export default ({
     async enviarResposta(comentario){
       await AdicionarComentario(this.id, comentario)
       this.modalResposta()
+      this.listaComentarioByTopico(this.id)
+      this.comentario = {
+        comentario: null
+      }
+    },
+    async deletarTopico(id) {
+      await DeletarTopico(id).then(res => {
+        this.$router.push({ name: 'principal' })
+    })
     },
     modalResposta(){
       this.isResposta = !this.isResposta
     },
-    fazerLogin(){
-      console.log('entrou aqui')
-      this.$router.push({ name: 'principal' })
-    },
-    listaContas(){
-      console.log(this.id)
+  },
+  mounted () {
+    this.listaTopicoId(this.id)
+    this.user = {
+      id: localStorage.getItem("id"),
+      nome: localStorage.getItem("nome"),
+      email: localStorage.getItem("email"),
+      perfil: localStorage.getItem("perfil")
     }
+  },
+  onUpdated(){
+    this.listaTopicoId(this.id)
   }
 })
 </script>

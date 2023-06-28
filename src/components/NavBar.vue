@@ -8,7 +8,7 @@
       <q-toolbar-title clickable @click="this.$router.push({ name: 'principal'})" style="cursor: pointer;">Activison</q-toolbar-title>
 
       <div class="usuario">
-        <q-avatar color="primary" text-color="white" class="q-mr-sm">
+        <q-avatar color="blue" text-color="white" class="q-mr-sm">
           <q-icon name="mdi-account"></q-icon>
         </q-avatar>
         <q-btn-dropdown color="white" :label='`Olá, ${user.nome} `' flat>

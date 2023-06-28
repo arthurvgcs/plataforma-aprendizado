@@ -16,10 +16,10 @@
             flat
             round
             icon="edit"
-            @click="editarPerfil(props.row)"
+            @click="editarConta(props.row)"
           >
           <q-tooltip>
-            Editar Perfil
+            Editar Conta
           </q-tooltip>
           </q-btn>
           <q-btn
@@ -37,14 +37,21 @@
   </q-table>
     </q-page-container>
   </q-layout>
+  <ModalConta
+      :modalConta="modalConta"
+      :contaSelecionada="contaSelecionada"
+      v-on:fechou-modal="estadoModal()"
+      v-on:atualizar-duvida="contaEditada"
+    />
 </template>
 
 <script>
-import { ListarContas, DeletarConta } from 'src/service/api'
+import { ListarContas, DeletarConta, EditarConta } from 'src/service/api'
 import NavBar from 'src/components/NavBar.vue'
+import ModalConta from './ModalConta.vue'
 export default ({
   name: 'Duvida',
-  components: { NavBar },
+  components: { NavBar, ModalConta },
   data () {
     return {
       contas: [],
@@ -54,6 +61,8 @@ export default ({
         { name: 'perfil', label: 'Perfil', field: 'perfil', align: 'center' },
         { name: 'acoes', label: '', field: '#', align: 'right'}
       ],
+      modalConta: false,
+      contaSelecionada: {}
     }
   },
   methods: {
@@ -64,6 +73,20 @@ export default ({
     async deletarConta (id) {
       await DeletarConta(id)
       this.listarContas()
+    },
+    contaEditada (conta){
+      const indexConta = this.contas.findIndex(item => item.codigo == conta.codigo)
+      this.contas.splice(indexConta, 1)
+      this.contas.splice(indexConta, 0, conta)
+      this.listarContas()
+    },
+    estadoModal () {
+      this.modalConta = !this.modalConta
+      this.listarContas()
+    },
+    editarConta (conta) {
+      this.contaSelecionada = conta
+      this.modalConta = true
     }
   },
   async mounted(){

@@ -5,15 +5,16 @@
         <q-card bordered
           class="card q-pa-md shadow-10"
           style="border-top: 5px solid #054e8e; width: 400px">
-          <q-card-section class="text-primary text-center">
+          <q-card-section class="text-blue text-center">
             <q-img
-              spinner-color="white"
+              spinner-color="blue"
+              src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg"
               contain
-              style="height: 110px; max-width: 300px"
+              style="height: 110px; max-width: 110px"
               class="q-mb-lg q-px-md" />
             <q-separator spaced />
           </q-card-section>
-          <q-card-section class="text-primary">
+          <q-card-section class="text-blue">
             <div class="text-h6">Bem vindo!</div>
             <div class="text-caption text-grey">Faça login...</div>
           </q-card-section>
@@ -22,24 +23,26 @@
             <q-input class="q-mb-md"
               clearable
               v-model="form.email"
+              color="blue"
               placeholder="meu@email.com"
               error-message="Deve ser um e-mail válido."
               outlined
               @keypress.enter="fazerLogin">
               <template v-slot:prepend>
                 <q-icon name="email"
-                  color='primary' />
+                  color='blue' />
               </template>
             </q-input>
 
             <q-input outlined
               v-model="form.password"
               :type="isPwd ? 'password' : 'text'"
+              color="blue"
               @keypress.enter="fazerLogin">
               <template v-slot:prepend>
                 <q-icon name="shield"
                   class="cursor-pointer"
-                  color='primary' />
+                  color='blue' />
               </template>
               <template v-slot:append>
                 <q-icon :name="isPwd ? 'visibility_off' : 'visibility'"
@@ -52,7 +55,7 @@
             <q-space />
             <q-btn class="q-my-xs"
               style="width: 100%"
-              color="primary"
+              color="blue"
               :loading="loading"
               @click="fazerLogin(form)">
               Login
@@ -60,88 +63,23 @@
           </q-card-actions>
           <div>
             <q-btn flat
-            color="info"
+            color="blue"
             no-caps
             dense
             class="q-px-sm"
             label="Cadastrar-se"
             @click="this.$router.push({ name: 'cadastro' })" />
           </div>
-          <div>
-            <q-btn flat
-            color="info"
-            no-caps
-            dense
-            class="q-px-sm"
-            label="Esqueci a senha"
-            @click="modalEsqueciSenha = true" />
-          </div>
           <q-inner-loading :showing="loading" />
         </q-card>
       </q-page>
-
-      <!-- <q-page class="flex justify-center items-center"
-        v-else>
-        <q-ajax-bar position="top"
-          color="primary"
-          size="5px" />
-        <q-card bordered
-          class="card q-pa-md shadow-10"
-          style="border-top: 5px solid #3E72AF; width: 400px">
-
-          <q-card-section class="text-primary text-center">
-            <q-img :src="$getLogo($q.dark.isActive)"
-              spinner-color="white"
-              contain
-              style="height: 110px; max-width: 300px"
-              class="q-mb-lg q-px-md" />
-            <q-separator spaced />
-          </q-card-section>
-          <q-card-section class="text-primary">
-            <div class="text-h6">Recuperar senha</div>
-            <div class="text-caption text-grey">Digite seu email</div>
-          </q-card-section>
-          <q-input class="q-mb-xs"
-            clearable
-            v-model="form.email"
-            placeholder="meu@email.com"
-            @blur="$v.form.email.$touch"
-            :error="$v.form.email.$error"
-            error-message="Deve ser um e-mail válido."
-            outlined
-            @keypress.enter="recuperarSenha">
-            <template v-slot:prepend>
-              <q-icon name="mdi-email-outline"
-                class="cursor-pointer"
-                color='primary' />
-            </template>
-          </q-input>
-
-          <q-btn class=" q-mt-md"
-            style="width: 100%"
-            color="primary"
-            :loading="loading"
-            @click="recuperarSenha">
-            Enviar
-            <span slot="loading">
-              <q-spinner-puff class="on-left" />Enviando...
-            </span>
-          </q-btn>
-          <q-btn flat
-            color="info"
-            no-caps
-            dense
-            class="q-px-sm q-mt-md"
-            label="Voltar"
-            @click="modalEsqueciSenha = false" />
-        </q-card>
-      </q-page> -->
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
 import { FazerLogin } from 'src/service/api';
+import { notificarSucesso} from 'src/utils/helpersNotification';
  
 export default ({
   name: 'Login',
