@@ -33,3 +33,22 @@ export function CriarDuvida (duvida) {
 export function ListarTopicos ( ) {
   return axios.get(`${API_URL}/forum/listartopico`)
 }
+
+export function ListaTopicoById (id) {
+  return axios.get(`${API_URL}/forum/listaTopico/${id}`)
+}
+
+export function AdicionarComentario (id, comentario) {
+  return axios.post(`${API_URL}/forum/comentarTopico/${id}`, {
+    comentario: comentario.comentario,
+    contaId: comentario.contaId,
+  })
+}
+
+export function ListaComentarioByTopico (id) {
+  return axios.get(`${API_URL}/forum/listarComentario/${id}`)
+}
+
+export function DeletarConta (id) {
+  return axios.delete(`${API_URL}/contas/remover/${id}`)
+}

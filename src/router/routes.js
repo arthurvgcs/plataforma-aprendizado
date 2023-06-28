@@ -22,10 +22,16 @@ const routes = [
     name: 'principal',
     component: () => import('pages/PaginaPrincipal.vue')
   },
+
   {
-    path: '/duvida',
+    path: '/duvida/:duvidaId',
     name: 'duvida',
     component: ( ) => import('pages/Duvida.vue')
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: ( ) => import('pages/Admin.vue')
   },
   {
     path: '/chamada',

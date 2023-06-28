@@ -2,31 +2,7 @@
   <div>
     <q-layout>
       <q-page-container>
-        <div>
-          <q-toolbar class="bg-dark text-white">
-            <q-btn flat round dense icon="menu" class="q-mr-sm" />
-            <q-avatar>
-              <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-            </q-avatar>
-
-            <q-toolbar-title>Activison</q-toolbar-title>
-
-            <div class="usuario">
-              <q-avatar>
-                <img src="https://cdn.quasar.dev/img/avatar.png">
-              </q-avatar>
-              <q-btn-dropdown color="white" :label='`Olá, ${user.nome} `' flat>
-                <q-list>
-                  <q-item clickable v-close-popup >
-                    <q-item-section>
-                      <q-item-label>Sair</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-btn-dropdown>
-            </div>
-          </q-toolbar>
-        </div>
+        <NavBar></NavBar>
         <div class="flex justify-center">
           <div class="col-1"></div>
           <div class="col-10 justify-center q-pa-md">
@@ -60,13 +36,12 @@
               </q-select>
             </q-card>
           </div> -->
-            <form @submit.prevent="submitForm">
               <div class="flex row justify-center">
                 <q-input
                   dark
                   filled
                   outlined
-                  v-model="duvida"
+                  v-model="duvidaFilter"
                   label="Busque sua dúvida no nosso forum"
                   class="input_duvida"
                 >
@@ -80,7 +55,7 @@
                   dark
                   filled
                   outlined
-                  v-model="selectedOptions"
+                  v-model="selectedTags"
                   :options="options"
                   use-input
                   input-debounce="0"
@@ -90,20 +65,28 @@
                   class="input_duvida q-mt-md"
                 />
               </div>
-            </form>
             <div class="row justify-end">
               <q-btn class="flex justify-end q-mt-md" color="primary" label="Quero criar uma nova Duvida" text-color="white" @click="estadoModal">
               </q-btn>
             </div>
-            <div>
-              <q-card v-for="duvida in duvidas" class="q-mt-md">
+            <div v-for="duvida in duvidas">
+              <q-card :key="duvida.codigo" v-if="duvidaFilter === '' || duvida.titulo.toLowerCase().includes(duvidaFilter.toLowerCase())" class="my-card q-mt-md">
                 <q-card-section>
                   <div class="text-h6">{{ duvida.titulo }}</div>
                   <div class="text-subtitle2">Por {{ duvida.conta.nome }}</div>
+                  <q-badge v-for="badge in duvida.tags" color="primary" class="q-mr-sm">
+                    {{ badge }}
+                  </q-badge>
                 </q-card-section>
                 <q-separator dark inset />
                 <q-card-section>
                   {{ duvida.descricao }}
+                </q-card-section>
+                <q-card-section class="flex justify-end">
+                  <q-btn label="Ver Duvida"
+                      class="q-px-md flex"
+                      color="primary"
+                      @click="pageDuvida(duvida)" />
                 </q-card-section>
               </q-card>
             </div>
@@ -123,12 +106,14 @@
 <script>
 import { list } from 'postcss';
 import ModalDuvida from 'src/pages/ModalDuvida.vue'
+import NavBar from 'src/components/NavBar.vue';
 import { ListarTopicos } from 'src/service/api'
 export default {
   name: 'PaginaPrincipal',
-  components: { ModalDuvida },
+  components: { ModalDuvida, NavBar },
   data() {
     return {
+      duvidaFilter: '',
       duvidas: [],
       user: {
         id: undefined,
@@ -137,7 +122,7 @@ export default {
         perfil: undefined
       },
       modalDuvida: false,
-      options: ['Opção 1', 'Opção 2', 'Opção 3', 'Opção 4'],
+      options: [ 'Web 1', 'Java/Spring', 'PHP/Laravel', 'JavaScript'],
       forumFilter: '',
       forums: [
         { id: 1, label: 'Materia 1', value: 'Materia 1' },
@@ -146,15 +131,15 @@ export default {
         { id: 4, label: 'Materia 4', value: 'Materia 4' },
       ],
       filteredForums: [],
-      selectedOptions: [],
+      selectedTags: [],
     };
   },
   methods: {
     submitForm() {
       const formData = new FormData();
       formData.append('duvida', this.duvida);
-      for (let i = 0; i < this.selectedOptions.length; i++) {
-        formData.append('tags[]', this.selectedOptions[i]);
+      for (let i = 0; i < this.selectedTags.length; i++) {
+        formData.append('tags[]', this.selectedTags[i]);
       }
 
       const data = [];
@@ -180,6 +165,9 @@ export default {
       obj.push(duvida)
       this.duvidas = [...obj]
     },
+    pageDuvida (duvida) {
+      this.$router.push({ path: `/duvida/${duvida.codigo}` })
+    },
     redirectChamada(event) {
       event.preventDefault();
       this.$router.push('/chamada');
@@ -196,13 +184,16 @@ export default {
   },
   watch: {
     forumFilter() {
-      this.selectedOptions = [];
+      this.selectedTags = [];
     },
   },
 };
 </script>
 <style>
-
+.my-card {
+  width: 650px;
+  max-width: 650px;
+}
 .input_duvida {
   width: 650px;
 }

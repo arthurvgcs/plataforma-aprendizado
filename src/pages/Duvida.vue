@@ -1,102 +1,124 @@
 <template>
   <q-layout>
     <q-page-container>
-      <div>
-    <q-toolbar class="bg-dark text-white">
-      <q-btn flat round dense icon="menu" class="q-mr-sm" />
-      <q-avatar>
-        <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-      </q-avatar>
-
-      <q-toolbar-title>Activison</q-toolbar-title>
-
-      <div>
-        <q-avatar>
-          <img src="https://cdn.quasar.dev/img/avatar.png">
-        </q-avatar>
-        <q-btn-dropdown color="white" label="Olá, Mary" flat>
-        <q-list>
-          <q-item clickable v-close-popup >
-            <q-item-section>
-              <q-item-label>Photos</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-        </q-btn-dropdown>
-      </div>
-    </q-toolbar>
+    <NavBar></NavBar>
     <div class="flex justify-center">
-      <q-card flat bordered class="my-card q-mt-md">
+      <q-card class="my-card q-mt-md">
       <q-card-section>
-        <div class="text-h6">Como posso iniciar um servidor em JavaScript?</div>
+        <div class="text-h6">{{ this.topico.titulo }}</div>
       </q-card-section>
       <q-card-section class="q-pt-none">
-        <q-badge color="blue">
-          Programação Web
+        <q-badge v-for="badge in this.topico.tags" color="primary" class="q-mr-sm">
+          {{ badge }}
         </q-badge>
       </q-card-section>
       <q-card-section class="q-pt-none">
-        <q-avatar>
-          <img src="https://cdn.quasar.dev/img/avatar.png">
+        <q-avatar color="primary" text-color="white" class="q-mr-sm">
+          <q-icon name="mdi-account"></q-icon>
         </q-avatar>
-        Mary
+        UserName
       </q-card-section>
       <q-card-section>
-        Boa noite, estou com dificuldades de iniciar um servidor em JavaScript, como posso iniciar?
+        {{ this.topico.descricao }}
       </q-card-section>
       <q-separator inset />
-      <div class="flex justify-start q-mt-sm q-ml-md">
-      <q-chat-message
-        name="Matilde"
-        avatar="https://cdn.quasar.dev/img/avatar5.jpg"
+      <q-card-actions v-if="isResposta" class="flex justify-end">
+        <q-editor class="my-editor q-ma-sm" v-model="comentario.comentario" min-height="5rem" />
+        <q-card-section class="">
+          <q-btn class="q-mr-md" label="Cancelar Resposta" color="negative" @click="modalResposta"></q-btn>
+          <q-btn class="" label="Enviar" color="primary" @click="enviarResposta(comentario)"></q-btn>
+        </q-card-section>
+      </q-card-actions>
+      <q-card-section v-else class="flex justify-start">
+        <q-btn label="Adicione uma Resposta" color="primary" @click="modalResposta">
+        </q-btn>
+      </q-card-section>
+      <q-card-section v-for="comentario in comentarios">
+        <q-chat-message
+        :name= comentario.conta.nome
+        avatar="https://cdn.quasar.dev/img/avatar3.jpg"
         :text="[
-          'Podemos resolver isso utilizando o express',
-          'Para isso você pode utilizar a documentação do express, acredito'
+          `${comentario.comentario}`,
         ]"
         size="10"
-        stamp="4 minutes ago"
         text-color="white"
         bg-color="primary"
       />
-
-      <q-btn class="q-my-xs"
-              style="width: 100%"
-              color="primary"
-              :loading="loading"
-              @click="listaContas()">
-              Teste
-            </q-btn>
-    </div>
+      </q-card-section>
     </q-card>
     </div>
-  </div>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
-import { ListarContas } from 'src/service/api'
+import { route } from 'quasar/wrappers'
+import { ListaTopicoById, AdicionarComentario, ListaComentarioByTopico } from 'src/service/api'
+import NavBar from 'src/components/NavBar.vue'
+import { useRoute } from 'vue-router'
 export default ({
   name: 'Duvida',
+  components: { NavBar },
   data () {
     return {
+      comentario: {
+        comentario: null,
+        contaId: localStorage.getItem("id")
+      },
+      comentarios: [],
+      topico: {},
       form: {
         email: null,
         password: null,
       },
       isPwd: true,
-      loading: false
+      loading: false,
+      id: null,
+      isResposta: false
     }
   },
+  created() {
+    this.id = this.$route.params.duvidaId;
+    this.listaTopicoId(this.id)
+    this.listaComentarioByTopico(this.id)
+  },
   methods: {
+    async listaTopicoId(id){
+      const { data } = await ListaTopicoById(id)
+      this.topico = data
+    },
+    async listaComentarioByTopico(id){
+      const { data } = await ListaComentarioByTopico(id)
+      this.comentarios = data
+    },
+    async enviarResposta(comentario){
+      await AdicionarComentario(this.id, comentario)
+      this.modalResposta()
+    },
+    modalResposta(){
+      this.isResposta = !this.isResposta
+    },
     fazerLogin(){
       console.log('entrou aqui')
       this.$router.push({ name: 'principal' })
     },
-    async listaContas(){
-      const { data } = await ListarContas()
-      console.log(data)
+    listaContas(){
+      console.log(this.id)
     }
   }
 })
 </script>
+<style>
+
+.my-card {
+  width: 650px;
+  max-width: 650px;
+}
+
+.my-editor {
+  width: 620px;
+  max-width: 620px;
+}
+
+
+</style>
