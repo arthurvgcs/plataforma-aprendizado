@@ -40,7 +40,10 @@
               <q-btn class="flex justify-end q-mt-md" color="blue" label="Quero criar uma nova Duvida" text-color="white" @click="estadoModal">
               </q-btn>
             </div>
-            <div v-for="duvida in duvidas">
+            <div v-if="duvidas.length < 1" class="text-h6">
+              Não temos dúvidas no momento.
+            </div>
+            <div v-else v-for="duvida in duvidas">
               <q-card  :key="duvida.codigo" v-if="duvidaFilter === '' || duvida.titulo.toLowerCase().includes(duvidaFilter.toLowerCase())" class="my-card flex column q-mt-md">
                 <q-card-section class="">
                   <div class="text-h6">{{ duvida.titulo }}</div>

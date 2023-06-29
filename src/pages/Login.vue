@@ -79,7 +79,6 @@
 
 <script>
 import { FazerLogin } from 'src/service/api';
-import { notificarSucesso} from 'src/utils/helpersNotification';
  
 export default ({
   name: 'Login',
