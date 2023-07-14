@@ -53,13 +53,14 @@
       </div>
     </q-card>
     </div>
-    <div class="flex justify-center" v-for="comentario in comentarios">
+    <div class="flex justify-center" v-for="comentario in comentarios" :key="comentario.id">
       <q-card class="my-card q-mt-md">
       <q-card-section>
         <div class="text-subtitle1"><q-avatar color="blue" text-color="white" class="q-mr-sm">
           <q-icon name="mdi-account"></q-icon>
         </q-avatar>{{ comentario.conta.nome }}</div>
         <div class="text-subtitle3 q-mt-sm">{{ formatDateResposta(comentario.createdAt) }}</div>
+        <div ><q-icon name="star"></q-icon> {{ mediaComentarios[comentario.id] }}</div>
       </q-card-section>
       <q-card-section>
         <q-badge rounded color="secondary" class="q-mr-sm">
@@ -69,6 +70,31 @@
       <q-separator dark inset />
       <q-card-section class="text-subtitle2">
         {{ comentario.comentario }}
+      </q-card-section>
+      <q-card-section v-if="comentario.showAvaliacao" class="text-subtitle2">
+        Avalie essa resposta de 0 a 5: 
+        <q-select
+          class="q-mt-sm"
+          col-6
+          dark
+          filled
+          outlined
+          v-model="comentario.nota"
+          :options="options"
+          behavior="menu"
+          label="Avalie aqui"
+        />
+        <q-card-section class="">
+          <q-btn class="q-mr-md" label="Cancelar Avaliação" color="negative" @click="modalAvaliacao(comentario)"></q-btn>
+          <q-btn class="" label="Enviar" color="blue" @click="avaliarComentario(comentario)"></q-btn>
+        </q-card-section>
+      </q-card-section>
+      <q-card-section v-else class="text-subtitle2">
+        <q-btn label="Avaliar Resposta"
+        size="12px"
+        class="q-px-md flex"
+        color="blue"
+        @click="modalAvaliacao(comentario)" />
       </q-card-section>
     </q-card>
     </div>
@@ -80,7 +106,7 @@
 <script>
 import { route } from 'quasar/wrappers'
 import moment from 'moment'
-import { ListaTopicoById, AdicionarComentario, ListaComentarioByTopico, DeletarTopico } from 'src/service/api'
+import { ListaTopicoById, AdicionarComentario, ListaComentarioByTopico, DeletarTopico, AvaliarComentario, MediaComentario } from 'src/service/api'
 import NavBar from 'src/components/NavBar.vue'
 import { useRoute } from 'vue-router'
 import { onUpdated } from 'vue'
@@ -89,12 +115,19 @@ export default ({
   components: { NavBar },
   data () {
     return {
+      mediaComentarios: {},
       comentario: {
         comentario: null,
-        contaId: localStorage.getItem("id")
+        contaId: localStorage.getItem("id"),
+        nota: null,
+        showAvaliacao: false,
+        isAvaliate: false,
+        mediaNota: 0
       },
       comentarios: [],
+      idUsuario: null,
       topico: {},
+      options: [ 0, 1, 2, 3, 4, 5],
       contaTopico: {},
       form: {
         email: null,
@@ -110,13 +143,15 @@ export default ({
       loading: false,
       id: null,
       isResposta: false,
+      isAvaliacao: false,
       isAluno: false
     }
   },
   created() {
     this.id = this.$route.params.duvidaId;
     this.listaComentarioByTopico(this.id);
-    this.listaTopicoId(this.id)
+    this.listaTopicoId(this.id);
+    this.idUsuario = localStorage.getItem("id");
   },
   methods: {
     formatDate(timestamp) {
@@ -134,6 +169,19 @@ export default ({
         return `Criado há ${Math.round(duration.asDays())} dias`
       }
     },
+     async mediaComentario(comentario){
+      try{
+        const { data } = await MediaComentario(comentario)
+        return data
+      } catch (error) {
+        console.error(error);
+        return null;
+      }  
+     },
+     async exibeMedia(comentario){
+      console.log("entrou aqui")
+      this.mediaComentarios[comentario.id] = await this.mediaComentario(comentario);
+     },
     formatDateResposta(timestamp) {
       const now = moment()
       const createdAt = moment(timestamp)
@@ -154,9 +202,17 @@ export default ({
       this.topico = data
       this.contaTopico = data.conta
     },
+    async avaliarComentario(comentario){
+      await AvaliarComentario(comentario, this.idUsuario)
+      this.modalAvaliacao(comentario)
+      this.listaComentarioByTopico(this.id)
+    },
     async listaComentarioByTopico(id){
       const { data } = await ListaComentarioByTopico(id)
       this.comentarios = data
+      this.comentarios.forEach(comentario => {
+      this.exibeMedia(comentario);
+  });
     },
     async enviarResposta(comentario){
       await AdicionarComentario(this.id, comentario)
@@ -174,6 +230,9 @@ export default ({
     modalResposta(){
       this.isResposta = !this.isResposta
     },
+    modalAvaliacao(comentario){
+      comentario.showAvaliacao = !comentario.showAvaliacao
+    }
   },
   mounted () {
     this.listaTopicoId(this.id)

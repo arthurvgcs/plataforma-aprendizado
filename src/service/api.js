@@ -62,3 +62,14 @@ export function EditarConta (id, conta) {
 export function DeletarTopico (id){
   return axios.delete(`${API_URL}/forum/removerTopico/${id}`)
 }
+
+export function AvaliarComentario(comentario, idUser){
+  return axios.post(`${API_URL}/forum/avaliarComentario/${comentario.id}`, {
+    nota: comentario.nota,
+    contaId: idUser
+  })
+}
+
+export function MediaComentario(comentario){
+  return axios.get(`${API_URL}/forum/mediaComentario/${comentario.id}`)
+}
