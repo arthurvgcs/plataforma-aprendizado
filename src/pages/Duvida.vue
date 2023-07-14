@@ -15,8 +15,8 @@
         </div>
       </q-card-section>
       <q-card-section class="q-pt-none">
-        <q-badge v-for="badge in this.topico.tags" rounded color="blue" class="q-mr-sm">
-          {{ badge }}
+        <q-badge v-if="topico.tags && topico.tags.length > 0" v-for="badge in topico.tags[0].split(',')" rounded color="blue" class="q-mr-sm">
+          {{ badge.trim() }}
         </q-badge>
       </q-card-section>
       <q-card-section class="q-pt-none">
@@ -24,6 +24,7 @@
           <q-icon name="mdi-account"></q-icon>
         </q-avatar>
         {{ contaTopico.nome }}
+        <div class="text-subtitle3 q-mt-sm">{{ formatDate(topico.createdAt) }}</div>
       </q-card-section>
       <q-card-section>
         {{ this.topico.descricao }}
@@ -34,7 +35,7 @@
         <q-editor class="my-editor q-ma-sm" v-model="comentario.comentario" min-height="5rem" />
         <q-card-section class="">
           <q-btn class="q-mr-md" label="Cancelar Resposta" color="negative" @click="modalResposta"></q-btn>
-          <q-btn class="" label="Enviar" color="blue" @click="enviarResposta(comentario)"></q-btn>
+          <q-btn class="" label="Enviar" color="blue" @click="enviarResposta(comentario, user.id)"></q-btn>
         </q-card-section>
         </q-card-actions>
         <q-card-section v-else class="flex justify-start">
@@ -58,6 +59,7 @@
         <div class="text-subtitle1"><q-avatar color="blue" text-color="white" class="q-mr-sm">
           <q-icon name="mdi-account"></q-icon>
         </q-avatar>{{ comentario.conta.nome }}</div>
+        <div class="text-subtitle3 q-mt-sm">{{ formatDateResposta(comentario.createdAt) }}</div>
       </q-card-section>
       <q-card-section>
         <q-badge rounded color="secondary" class="q-mr-sm">
@@ -77,6 +79,7 @@
 
 <script>
 import { route } from 'quasar/wrappers'
+import moment from 'moment'
 import { ListaTopicoById, AdicionarComentario, ListaComentarioByTopico, DeletarTopico } from 'src/service/api'
 import NavBar from 'src/components/NavBar.vue'
 import { useRoute } from 'vue-router'
@@ -112,9 +115,40 @@ export default ({
   },
   created() {
     this.id = this.$route.params.duvidaId;
-    this.listaComentarioByTopico(this.id)
+    this.listaComentarioByTopico(this.id);
+    this.listaTopicoId(this.id)
   },
   methods: {
+    formatDate(timestamp) {
+      const now = moment()
+      const createdAt = moment(timestamp)
+      const duration = moment.duration(now.diff(createdAt))
+
+      if (duration.asSeconds() < 60) {
+        return 'Criado há menos de um minuto'
+      } else if (duration.asMinutes() < 60) {
+        return `Criado há ${Math.round(duration.asMinutes())} minutos`
+      } else if (duration.asHours() < 24) {
+        return `Criado há ${Math.round(duration.asHours())} horas`
+      } else {
+        return `Criado há ${Math.round(duration.asDays())} dias`
+      }
+    },
+    formatDateResposta(timestamp) {
+      const now = moment()
+      const createdAt = moment(timestamp)
+      const duration = moment.duration(now.diff(createdAt))
+
+      if (duration.asSeconds() < 60) {
+        return 'Respondido há menos de um minuto'
+      } else if (duration.asMinutes() < 60) {
+        return `Respondido há ${Math.round(duration.asMinutes())} minutos`
+      } else if (duration.asHours() < 24) {
+        return `Respondido há ${Math.round(duration.asHours())} horas`
+      } else {
+        return `Respondido há ${Math.round(duration.asDays())} dias`
+      }
+    },
     async listaTopicoId(id){
       const { data } = await ListaTopicoById(id)
       this.topico = data

@@ -3,7 +3,7 @@
     v-model="modalVisible">
     <q-card style="width: 600px">
       <q-card-section>
-        <div class="text-h6">Cadastrar Duvida</div>
+        <div class="text-h6">Editar Usuário</div>
       </q-card-section>
       <q-card-section class="q-col-gutter-sm">
         <div class="row q-col-gutter-sm">

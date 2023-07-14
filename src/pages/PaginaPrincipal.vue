@@ -34,23 +34,25 @@
                   multiple
                   label="Filtre suas dúvidas pelas tags"
                   class="input_duvida q-mt-md"
+                  :filter="filterTags"
                 />
               </div>
             <div class="flex row justify-end">
               <q-btn class="flex justify-end q-mt-md" color="blue" label="Quero criar uma nova Duvida" text-color="white" @click="estadoModal">
               </q-btn>
             </div>
-            <div v-if="duvidas.length < 1" class="text-h6">
+            <div v-if="filteredDuvidas.length < 1" class="text-h6">
               Não temos dúvidas no momento.
             </div>
-            <div v-else v-for="duvida in duvidas">
+            <div v-else v-for="duvida in filteredDuvidas">
               <q-card  :key="duvida.codigo" v-if="duvidaFilter === '' || duvida.titulo.toLowerCase().includes(duvidaFilter.toLowerCase())" class="my-card flex column q-mt-md">
                 <q-card-section class="">
                   <div class="text-h6">{{ duvida.titulo }}</div>
                   <div class="text-subtitle2">Por {{ duvida.conta.nome }}</div>
-                  <q-badge v-for="badge in duvida.tags" rounded color="blue" class="q-mr-sm">
-                    {{ badge }}
+                  <q-badge v-for="badge in duvida.tags[0].split(',')" rounded color="blue" class="q-mr-sm">
+                    {{ badge.trim() }}
                   </q-badge>
+                  <div class="text-subtitle3 q-mt-sm">{{ formatDate(duvida.createdAt) }}</div>
                 </q-card-section>
                 <q-separator dark inset />
                 <q-card-section class="flex row">
@@ -78,7 +80,7 @@
   </div>
 </template>
 <script>
-import { list } from 'postcss';
+import moment from 'moment'
 import ModalDuvida from 'src/pages/ModalDuvida.vue'
 import NavBar from 'src/components/NavBar.vue';
 import { ListarTopicos } from 'src/service/api'
@@ -108,7 +110,55 @@ export default {
       selectedTags: [],
     };
   },
+  computed: {
+    separedTags() {
+      if (this.duvida.tags && this.duvida.tags.length > 0) {
+        const tagsString = this.duvida.tags[0];
+        return tagsString.split(",");
+      }
+      return [];
+    },
+    filteredDuvidas(){
+      if (this.selectedTags.length === 0) {
+        return this.duvidas;
+      }
+
+      return this.duvidas.filter((duvida) => {
+        return this.selectedTags.every((tag) => {
+          return duvida.tags[0].toLowerCase().includes(tag.toLowerCase());
+        });
+      });
+    },
+  },
   methods: {
+    formatDate(timestamp) {
+      const now = moment()
+      const createdAt = moment(timestamp)
+      const duration = moment.duration(now.diff(createdAt))
+
+      if (duration.asSeconds() < 60) {
+        return 'Recém-criado'
+      } else if (duration.asMinutes() < 60) {
+        return `Criado há ${Math.round(duration.asMinutes())} minutos`
+      } else if (duration.asHours() < 24) {
+        return `Criado há ${Math.round(duration.asHours())} horas`
+      } else {
+        return `Criado há ${Math.round(duration.asDays())} dias`
+      }
+    },
+    filterTags(val, update, item) {
+      if (val === "") {
+        update(() => {
+          item.visible = true;
+        });
+        return;
+      }
+
+      const searchValue = val.toLowerCase();
+      update(() => {
+        item.visible = item.label.toLowerCase().includes(searchValue);
+      });
+    },
     submitForm() {
       const formData = new FormData();
       formData.append('duvida', this.duvida);
@@ -123,8 +173,6 @@ export default {
           value,
         });
       }
-
-      console.log(data);
     },
     async listarDuvidas () {
       const { data } = await ListarTopicos()

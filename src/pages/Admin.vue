@@ -10,6 +10,11 @@
       row-key="id"
       hide-bottom
     >
+    <template v-slot:body-cell-createdAt="props">
+        <q-td class="text-center">
+          <p>{{ timestampForDate(props.row.createdAt)}}</p>
+        </q-td>
+      </template>
     <template v-slot:body-cell-acoes="props">
         <q-td class="text-right">
           <q-btn
@@ -47,6 +52,7 @@
 
 <script>
 import { ListarContas, DeletarConta, EditarConta } from 'src/service/api'
+import dayjs from 'dayjs'
 import NavBar from 'src/components/NavBar.vue'
 import ModalConta from './ModalConta.vue'
 export default ({
@@ -59,6 +65,7 @@ export default ({
         { name: 'nome', label: 'Nome', field: 'nome', align: 'left' },
         { name: 'email', label: 'Email', field: 'email', align: 'left' },
         { name: 'perfil', label: 'Perfil', field: 'perfil', align: 'center' },
+        { name: 'createdAt', label: 'Data de Criação', field: 'createdAt', align: 'center' },
         { name: 'acoes', label: '', field: '#', align: 'right'}
       ],
       modalConta: false,
@@ -66,6 +73,9 @@ export default ({
     }
   },
   methods: {
+    timestampForDate(timestamp) {
+      return dayjs(timestamp).format('DD/MM/YYYY')
+    },
     async listarContas () {
       const { data } = await ListarContas()
       this.contas = data
